@@ -11,8 +11,28 @@
   <main class="wrap">
     <header>
       <h1>Kalkulator Gaji Bersih</h1>
-      <p class="sub">PPh 21 tarif TER kategori A · status TK/0 (PP 58/2023)</p>
+      <p class="sub">PPh 21 bulanan dengan tarif TER (PP 58/2023)</p>
     </header>
+
+    <label class="field" for="status">
+      <span class="field-label">Status PTKP</span>
+      <span class="input-box select-box">
+        <select id="status">
+          <optgroup label="Tidak kawin">
+            <option value="TK/0" selected>TK/0 · tanpa tanggungan</option>
+            <option value="TK/1">TK/1 · 1 tanggungan</option>
+            <option value="TK/2">TK/2 · 2 tanggungan</option>
+            <option value="TK/3">TK/3 · 3 tanggungan</option>
+          </optgroup>
+          <optgroup label="Kawin">
+            <option value="K/0">K/0 · tanpa tanggungan</option>
+            <option value="K/1">K/1 · 1 tanggungan</option>
+            <option value="K/2">K/2 · 2 tanggungan</option>
+            <option value="K/3">K/3 · 3 tanggungan</option>
+          </optgroup>
+        </select>
+      </span>
+    </label>
 
     <label class="field" for="gaji">
       <span class="field-label">Gaji kotor per bulan</span>
@@ -28,6 +48,10 @@
       <div class="hero">
         <span class="hero-label">Gaji bersih (take home pay)</span>
         <strong id="bersih" class="hero-value">Rp0</strong>
+        <span class="hero-meta">
+          <span id="status-hasil" class="badge">TK/0</span>
+          <span id="kategori" class="badge">TER kategori A</span>
+        </span>
       </div>
       <dl class="rows">
         <div class="row">
