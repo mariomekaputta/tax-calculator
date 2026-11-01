@@ -29,26 +29,41 @@ const rupiah = (n) => "Rp" + n.toLocaleString("id-ID");
 const persen = (bp) => (bp / 100).toLocaleString("id-ID") + "%";
 
 if (typeof document !== "undefined") {
-  document.getElementById("form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const err = document.getElementById("error");
-    const tabel = document.getElementById("hasil");
-    const angka = document.getElementById("gaji").value.replace(/[^\d]/g, "");
+  const input = document.getElementById("gaji");
+  const err = document.getElementById("error");
+  const el = (id) => document.getElementById(id);
+
+  function tampilkan(bruto) {
+    const h = hitung(bruto);
+    el("kotor").textContent = rupiah(bruto);
+    el("tarif").textContent = persen(h.bp);
+    el("pph").textContent = "−" + rupiah(h.pph);
+    el("bersih").textContent = rupiah(h.bersih);
+  }
+
+  input.addEventListener("input", () => {
+    // Simpan posisi kursor sebagai jumlah digit di kirinya, lalu format ulang.
+    const kiri = input.value.slice(0, input.selectionStart).replace(/\D/g, "").length;
+    const angka = input.value.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
     const bruto = Number(angka);
 
-    if (!angka || !Number.isSafeInteger(bruto)) {
-      err.textContent = "Masukkan gaji dalam angka, misalnya 10000000.";
-      tabel.hidden = true;
+    if (!Number.isSafeInteger(bruto)) {
+      err.textContent = "Angkanya terlalu besar.";
       return;
     }
-
-    const h = hitung(bruto);
     err.textContent = "";
-    document.getElementById("tarif").textContent = persen(h.bp);
-    document.getElementById("pph").textContent = rupiah(h.pph);
-    document.getElementById("bersih").textContent = rupiah(h.bersih);
-    tabel.hidden = false;
+
+    input.value = angka ? bruto.toLocaleString("id-ID") : "";
+    let pos = 0;
+    for (let digit = 0; pos < input.value.length && digit < kiri; pos++) {
+      if (/\d/.test(input.value[pos])) digit++;
+    }
+    input.setSelectionRange(pos, pos);
+
+    tampilkan(bruto);
   });
+
+  tampilkan(0);
 }
 
 if (typeof module !== "undefined") module.exports = { hitung };

@@ -3,26 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f766e">
   <title>Kalkulator Gaji Bersih</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Kalkulator Gaji Bersih</h1>
-  <p>Status TK/0, PPh 21 tarif TER kategori A (PP 58/2023).</p>
+  <main class="wrap">
+    <header>
+      <h1>Kalkulator Gaji Bersih</h1>
+      <p class="sub">PPh 21 tarif TER kategori A · status TK/0 (PP 58/2023)</p>
+    </header>
 
-  <form id="form">
-    <label for="gaji">Gaji kotor per bulan (Rp)</label>
-    <input id="gaji" type="text" inputmode="numeric" placeholder="10.000.000" required>
-    <button type="submit">Hitung</button>
-  </form>
+    <label class="field" for="gaji">
+      <span class="field-label">Gaji kotor per bulan</span>
+      <span class="input-box">
+        <span class="prefix">Rp</span>
+        <input id="gaji" type="text" inputmode="numeric" autocomplete="off"
+               placeholder="0" aria-describedby="error">
+      </span>
+    </label>
+    <p id="error" class="error" role="alert"></p>
 
-  <p id="error" class="error"></p>
+    <section class="card" aria-live="polite">
+      <div class="hero">
+        <span class="hero-label">Gaji bersih (take home pay)</span>
+        <strong id="bersih" class="hero-value">Rp0</strong>
+      </div>
+      <dl class="rows">
+        <div class="row">
+          <dt>Gaji kotor</dt>
+          <dd id="kotor">Rp0</dd>
+        </div>
+        <div class="row">
+          <dt>Potongan PPh 21 <span id="tarif" class="badge">0%</span></dt>
+          <dd id="pph" class="minus">−Rp0</dd>
+        </div>
+      </dl>
+    </section>
 
-  <table id="hasil" hidden>
-    <tr><th>Tarif TER</th><td id="tarif"></td></tr>
-    <tr><th>PPh 21 sebulan</th><td id="pph"></td></tr>
-    <tr><th>Gaji bersih</th><td id="bersih"></td></tr>
-  </table>
+    <p class="note">Berlaku untuk masa Januari–November. Belum termasuk BPJS dan potongan lain.</p>
+  </main>
 
   <script src="app.js"></script>
 </body>
