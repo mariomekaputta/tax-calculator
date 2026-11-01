@@ -47,12 +47,45 @@ const KATEGORI = {
   "K/3": "C",
 };
 
-function hitung(bruto, status = "TK/0") {
+// Iuran BPJS dalam basis poin; batas = gaji maksimal yang dipakai sebagai dasar iuran.
+// Batas upah JP disesuaikan pemerintah tiap tahun, perbarui bila berubah.
+const BPJS = {
+  karyawan: {
+    jht: { bp: 200 },
+    jp: { bp: 100, batas: 11086300 },
+    kesehatan: { bp: 100, batas: 12000000 },
+  },
+  perusahaan: {
+    jkk: { bp: 24 },
+    jkm: { bp: 30 },
+    kesehatan: { bp: 400, batas: 12000000 },
+  },
+};
+
+function iuran(gaji, { bp, batas = Infinity }) {
+  return Math.round((Math.min(gaji, batas) * bp) / 10000);
+}
+
+function hitung(gaji, status = "TK/0") {
+  const potongan = {
+    jht: iuran(gaji, BPJS.karyawan.jht),
+    jp: iuran(gaji, BPJS.karyawan.jp),
+    kesehatan: iuran(gaji, BPJS.karyawan.kesehatan),
+  };
+  const tunjangan = {
+    jkk: iuran(gaji, BPJS.perusahaan.jkk),
+    jkm: iuran(gaji, BPJS.perusahaan.jkm),
+    kesehatan: iuran(gaji, BPJS.perusahaan.kesehatan),
+  };
+  // Iuran yang dibayar perusahaan menambah penghasilan bruto untuk PPh 21.
+  const bruto = gaji + tunjangan.jkk + tunjangan.jkm + tunjangan.kesehatan;
+
   const kategori = KATEGORI[status];
   const bp = TER[kategori].find(([batas]) => bruto <= batas)[1];
   // Basis poin bulat agar tidak ada galat floating point; dibulatkan ke bawah per rupiah.
   const pph = Math.floor((bruto * bp) / 10000);
-  return { kategori, bp, pph, bersih: bruto - pph };
+  const totalBpjs = potongan.jht + potongan.jp + potongan.kesehatan;
+  return { kategori, bp, bruto, potongan, tunjangan, pph, bersih: gaji - totalBpjs - pph };
 }
 
 const rupiah = (n) => "Rp" + n.toLocaleString("id-ID");
@@ -70,8 +103,15 @@ if (typeof document !== "undefined") {
     el("kategori").textContent = "TER kategori " + h.kategori;
     el("status-hasil").textContent = status.value;
     el("kotor").textContent = rupiah(bruto);
+    el("jht").textContent = "−" + rupiah(h.potongan.jht);
+    el("jp").textContent = "−" + rupiah(h.potongan.jp);
+    el("kes").textContent = "−" + rupiah(h.potongan.kesehatan);
     el("tarif").textContent = persen(h.bp);
     el("pph").textContent = "−" + rupiah(h.pph);
+    el("jkk").textContent = rupiah(h.tunjangan.jkk);
+    el("jkm").textContent = rupiah(h.tunjangan.jkm);
+    el("kes-pr").textContent = rupiah(h.tunjangan.kesehatan);
+    el("bruto").textContent = rupiah(h.bruto);
     el("bersih").textContent = rupiah(h.bersih);
   }
 

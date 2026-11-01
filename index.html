@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f766e">
   <title>Kalkulator Gaji Bersih</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <main class="wrap">
@@ -59,15 +59,50 @@
           <dd id="kotor">Rp0</dd>
         </div>
         <div class="row">
-          <dt>Potongan PPh 21 <span id="tarif" class="badge">0%</span></dt>
+          <dt>JHT 2%</dt>
+          <dd id="jht" class="minus">−Rp0</dd>
+        </div>
+        <div class="row">
+          <dt>JP 1%</dt>
+          <dd id="jp" class="minus">−Rp0</dd>
+        </div>
+        <div class="row">
+          <dt>BPJS Kesehatan 1%</dt>
+          <dd id="kes" class="minus">−Rp0</dd>
+        </div>
+        <div class="row">
+          <dt>PPh 21 <span id="tarif" class="badge">0%</span></dt>
           <dd id="pph" class="minus">−Rp0</dd>
         </div>
       </dl>
     </section>
 
-    <p class="note">Berlaku untuk masa Januari–November. Belum termasuk BPJS dan potongan lain.</p>
+    <details class="card detail">
+      <summary>Dasar perhitungan PPh 21</summary>
+      <p class="detail-note">Iuran yang dibayar perusahaan tidak memotong gaji, tapi ditambahkan ke penghasilan bruto untuk PPh 21.</p>
+      <dl class="rows">
+        <div class="row">
+          <dt>JKK 0,24%</dt>
+          <dd id="jkk">Rp0</dd>
+        </div>
+        <div class="row">
+          <dt>JKM 0,3%</dt>
+          <dd id="jkm">Rp0</dd>
+        </div>
+        <div class="row">
+          <dt>BPJS Kesehatan 4%</dt>
+          <dd id="kes-pr">Rp0</dd>
+        </div>
+        <div class="row total">
+          <dt>Penghasilan bruto</dt>
+          <dd id="bruto">Rp0</dd>
+        </div>
+      </dl>
+    </details>
+
+    <p class="note">Berlaku untuk masa Januari–November. Dasar iuran JP maksimal Rp11.086.300, BPJS Kesehatan maksimal Rp12.000.000.</p>
   </main>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

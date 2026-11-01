@@ -187,6 +187,23 @@ dd {
 
 .minus { color: var(--danger); }
 
+.detail { margin-top: 12px; }
+
+.detail summary {
+  cursor: pointer;
+  padding: 14px 20px;
+  font-weight: 600;
+}
+
+.detail-note {
+  margin: 0;
+  padding: 0 20px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.row.total dt { color: var(--text); font-weight: 600; }
+
 .badge {
   display: inline-block;
   margin-left: 4px;
