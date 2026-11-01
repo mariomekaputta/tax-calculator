@@ -66,6 +66,11 @@ function iuran(gaji, { bp, batas = Infinity }) {
   return Math.round((Math.min(gaji, batas) * bp) / 10000);
 }
 
+// Tarif TER (basis poin) untuk bruto; bruto tepat di batas ikut tarif rentang itu.
+function tarif(bruto, kategori) {
+  return TER[kategori].find(([batas]) => bruto <= batas)[1];
+}
+
 function hitung(gaji, status = "TK/0") {
   const potongan = {
     jht: iuran(gaji, BPJS.karyawan.jht),
@@ -81,7 +86,7 @@ function hitung(gaji, status = "TK/0") {
   const bruto = gaji + tunjangan.jkk + tunjangan.jkm + tunjangan.kesehatan;
 
   const kategori = KATEGORI[status];
-  const bp = TER[kategori].find(([batas]) => bruto <= batas)[1];
+  const bp = tarif(bruto, kategori);
   // Basis poin bulat agar tidak ada galat floating point; dibulatkan ke bawah per rupiah.
   const pph = Math.floor((bruto * bp) / 10000);
   const totalBpjs = potongan.jht + potongan.jp + potongan.kesehatan;
@@ -142,4 +147,4 @@ if (typeof document !== "undefined") {
   tampilkan(brutoSaatIni());
 }
 
-if (typeof module !== "undefined") module.exports = { hitung };
+if (typeof module !== "undefined") module.exports = { hitung, tarif, TER, KATEGORI };
