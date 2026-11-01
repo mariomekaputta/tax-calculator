@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Pengaturan lokal Claude Code
+.claude/settings.local.json
+
+# Rahasia & dependensi (jaga-jaga)
+.env
+.env.*
+node_modules/

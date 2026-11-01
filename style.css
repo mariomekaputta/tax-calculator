@@ -1,0 +1,32 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 0 16px;
+}
+
+label, input, button {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.4rem;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+table {
+  margin-top: 1rem;
+  border-collapse: collapse;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.25rem 1rem 0.25rem 0;
+}
+
+.error {
+  color: #b00020;
+}

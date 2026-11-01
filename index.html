@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kalkulator Gaji Bersih</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Kalkulator Gaji Bersih</h1>
+  <p>Status TK/0, PPh 21 tarif TER kategori A (PP 58/2023).</p>
+
+  <form id="form">
+    <label for="gaji">Gaji kotor per bulan (Rp)</label>
+    <input id="gaji" type="text" inputmode="numeric" placeholder="10.000.000" required>
+    <button type="submit">Hitung</button>
+  </form>
+
+  <p id="error" class="error"></p>
+
+  <table id="hasil" hidden>
+    <tr><th>Tarif TER</th><td id="tarif"></td></tr>
+    <tr><th>PPh 21 sebulan</th><td id="pph"></td></tr>
+    <tr><th>Gaji bersih</th><td id="bersih"></td></tr>
+  </table>
+
+  <script src="app.js"></script>
+</body>
+</html>
