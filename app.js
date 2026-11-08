@@ -145,6 +145,28 @@ if (typeof document !== "undefined") {
   status.addEventListener("change", () => tampilkan(brutoSaatIni()));
 
   tampilkan(brutoSaatIni());
+
+  // Tombol tema: Otomatis (ikut OS) -> Terang -> Gelap -> Otomatis.
+  const TEMA = [["auto", "Otomatis"], ["light", "Terang"], ["dark", "Gelap"]];
+  const tombolTema = el("tema");
+  const temaSaatIni = () => document.documentElement.dataset.theme || "auto";
+  const labelTema = () => {
+    const label = TEMA.find(([k]) => k === temaSaatIni())[1];
+    tombolTema.textContent = label;
+    tombolTema.setAttribute("aria-label", "Tema: " + label + ". Klik untuk ganti.");
+  };
+  tombolTema.addEventListener("click", () => {
+    const i = TEMA.findIndex(([k]) => k === temaSaatIni());
+    const [berikut] = TEMA[(i + 1) % TEMA.length];
+    if (berikut === "auto") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = berikut;
+    try {
+      if (berikut === "auto") localStorage.removeItem("tema");
+      else localStorage.setItem("tema", berikut);
+    } catch (e) {}
+    labelTema();
+  });
+  labelTema();
 }
 
 if (typeof module !== "undefined") module.exports = { hitung, tarif, TER, KATEGORI };

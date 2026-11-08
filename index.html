@@ -5,13 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0f766e">
   <title>Kalkulator Gaji Bersih</title>
-  <link rel="stylesheet" href="style.css?v=5">
+  <script>
+    // Pasang tema tersimpan sebelum CSS dimuat agar tidak berkedip.
+    try {
+      const t = localStorage.getItem("tema");
+      if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <main class="wrap">
     <header>
-      <h1>Kalkulator Gaji Bersih</h1>
-      <p class="sub">PPh 21 bulanan dengan tarif TER (PP 58/2023)</p>
+      <div>
+        <h1>Kalkulator Gaji Bersih</h1>
+        <p class="sub">PPh 21 bulanan dengan tarif TER (PP 58/2023)</p>
+      </div>
+      <button type="button" class="theme-btn" id="tema" aria-label="Ganti tema">Otomatis</button>
     </header>
 
     <label class="field" for="status">
@@ -103,6 +113,6 @@
     <p class="note">Berlaku untuk masa Januari–November. Dasar iuran JP maksimal Rp11.086.300, BPJS Kesehatan maksimal Rp12.000.000.</p>
   </main>
 
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

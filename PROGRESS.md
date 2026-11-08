@@ -14,7 +14,7 @@ Kalkulator gaji bersih (take home pay) di browser: PPh 21 bulanan dengan tarif T
 | File | Isi |
 |---|---|
 | `index.html` | Halaman utama: pilihan status PTKP, isian gaji, kartu hasil, rincian dasar PPh 21 |
-| `style.css` | Tampilan mobile-first, mode gelap otomatis |
+| `style.css` | Tampilan mobile-first; tema ikut OS atau dipilih manual (Otomatis/Terang/Gelap, tersimpan di localStorage) |
 | `app.js` | Tabel TER A/B/C, pemetaan status → kategori, konstanta BPJS, fungsi `hitung()`, logika UI. Mengekspor `hitung`, `tarif`, `TER`, `KATEGORI` untuk dites di Node |
 | `test.js` | Tes otomatis (`node --test`): kasus uji, pemetaan status, urutan tabel TER, batas tiap rentang A/B/C, batas dasar iuran BPJS |
 | `tarif-ter.md` | Tabel TER kategori A, B, C dan pemetaan status PTKP, ditranskripsi dari sumber resmi beserta link-nya |
