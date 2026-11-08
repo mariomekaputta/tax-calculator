@@ -6,6 +6,7 @@ Kalkulator gaji bersih (take home pay) di browser: PPh 21 bulanan dengan tarif T
 
 - GitHub: https://github.com/mariomekaputta/tax-calculator
 - Vercel: https://tax-calculator-me-cfea.vercel.app — tercatat sebagai homepage repo. Saat dicek 1 November 2026 link ini membuka halaman login Vercel (Deployment Protection aktif), jadi isi deploy belum bisa dipastikan sama dengan `main`.
+- Tes: `node --test` (Node 18+, tanpa npm)
 - Lokal: `python3 -m http.server 3000` di folder ini, lalu buka http://localhost:3000
 
 ## Struktur proyek
@@ -13,8 +14,9 @@ Kalkulator gaji bersih (take home pay) di browser: PPh 21 bulanan dengan tarif T
 | File | Isi |
 |---|---|
 | `index.html` | Halaman utama: pilihan status PTKP, isian gaji, kartu hasil, rincian dasar PPh 21 |
-| `style.css` | Tampilan mobile-first, mode gelap otomatis |
-| `app.js` | Tabel TER A/B/C, pemetaan status → kategori, konstanta BPJS, fungsi `hitung()`, logika UI. Mengekspor `hitung` untuk dites di Node |
+| `style.css` | Tampilan mobile-first; tema ikut OS atau dipilih manual (Otomatis/Terang/Gelap, tersimpan di localStorage) |
+| `app.js` | Tabel TER A/B/C, pemetaan status → kategori, konstanta BPJS, fungsi `hitung()`, logika UI. Mengekspor `hitung`, `tarif`, `TER`, `KATEGORI` untuk dites di Node |
+| `test.js` | Tes otomatis (`node --test`): kasus uji, pemetaan status, urutan tabel TER, batas tiap rentang A/B/C, batas dasar iuran BPJS |
 | `tarif-ter.md` | Tabel TER kategori A, B, C dan pemetaan status PTKP, ditranskripsi dari sumber resmi beserta link-nya |
 | `PROGRESS.md` | Dokumen ini |
 | `.gitignore` | `.DS_Store`, folder editor, `.claude/settings.local.json`, `.env*`, `node_modules/` |
@@ -28,6 +30,7 @@ Kalkulator gaji bersih (take home pay) di browser: PPh 21 bulanan dengan tarif T
 | `2f66657` | Pilihan status PTKP TK/0–TK/3 dan K/0–K/3, kategori TER A/B/C otomatis, kategori tampil di hasil |
 | `80a0955` | Potongan BPJS karyawan, iuran perusahaan masuk bruto, rincian dasar perhitungan PPh 21; versi aset `?v=4` untuk mencegah cache lama |
 | `100084e` → `714b99f` | Catatan batasan perhitungan ditambahkan, lalu dibatalkan dengan `git revert` |
+| (commit ini) | Tes otomatis `test.js`; pencarian tarif dipisah ke fungsi `tarif()`; aset `?v=5` |
 
 ## Aturan hitung
 
@@ -82,9 +85,8 @@ gaji bersih = gaji − JHT − JP − BPJS Kesehatan karyawan − PPh 21
 ## Ide fitur berikutnya
 
 1. **Perhitungan Desember / setahun**: PPh 21 Pasal 17 dengan PTKP, biaya jabatan, dan pengurang iuran JHT/JP, supaya total setahun akurat.
-2. **Tes otomatis**: file `test.js` yang dijalankan dengan `node`, berisi kasus uji di atas dan batas rentang tiap kategori.
-3. **Tunjangan dan komponen lain**: tunjangan tetap/tidak tetap, THR, bonus, lembur.
-4. **Mode kebalikan**: dari gaji bersih yang diinginkan, cari gaji kotor (gross-up).
-5. **Pengaturan BPJS**: opsi tidak ikut JP/BPJS Kesehatan, tarif JKK sesuai tingkat risiko, batas upah yang bisa diubah.
-6. **Bagikan dan cetak**: simpan input ke URL agar bisa dibagikan, tombol salin/cetak rincian.
-7. **Deploy**: pastikan Vercel publik dan otomatis deploy dari `main`, atau pakai GitHub Pages.
+2. **Tunjangan dan komponen lain**: tunjangan tetap/tidak tetap, THR, bonus, lembur.
+3. **Mode kebalikan**: dari gaji bersih yang diinginkan, cari gaji kotor (gross-up).
+4. **Pengaturan BPJS**: opsi tidak ikut JP/BPJS Kesehatan, tarif JKK sesuai tingkat risiko, batas upah yang bisa diubah.
+5. **Bagikan dan cetak**: simpan input ke URL agar bisa dibagikan, tombol salin/cetak rincian.
+6. **Deploy**: pastikan Vercel publik dan otomatis deploy dari `main`, atau pakai GitHub Pages.
