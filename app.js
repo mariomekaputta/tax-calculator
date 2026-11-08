@@ -137,7 +137,35 @@ if (typeof document !== "undefined") {
     tampilkan(bruto);
   });
 
-  status.addEventListener("change", () => tampilkan(brutoSaatIni()));
+  // Isian disimpan di URL (?status=K/1&gaji=7000000) agar hasil bisa dibagikan.
+  const params = new URLSearchParams(location.search);
+  if (params.get("status") in KATEGORI) status.value = params.get("status");
+  const gajiUrl = Number(params.get("gaji"));
+  if (Number.isSafeInteger(gajiUrl) && gajiUrl > 0) input.value = gajiUrl.toLocaleString("id-ID");
+
+  function simpanKeUrl() {
+    const q = new URLSearchParams({ status: status.value });
+    if (brutoSaatIni()) q.set("gaji", brutoSaatIni());
+    history.replaceState(null, "", "?" + q);
+  }
+
+  input.addEventListener("input", simpanKeUrl);
+  status.addEventListener("change", () => {
+    tampilkan(brutoSaatIni());
+    simpanKeUrl();
+  });
+
+  const tombolBagikan = el("bagikan");
+  tombolBagikan.addEventListener("click", async () => {
+    simpanKeUrl();
+    try {
+      await navigator.clipboard.writeText(location.href);
+      tombolBagikan.textContent = "Tersalin ✓";
+    } catch (e) {
+      tombolBagikan.textContent = "Gagal menyalin";
+    }
+    setTimeout(() => (tombolBagikan.textContent = "Salin link"), 2000);
+  });
 
   tampilkan(brutoSaatIni());
 }

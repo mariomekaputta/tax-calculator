@@ -28,6 +28,7 @@ Kalkulator gaji bersih (take home pay) di browser: PPh 21 bulanan dengan tarif T
 | `2f66657` | Pilihan status PTKP TK/0–TK/3 dan K/0–K/3, kategori TER A/B/C otomatis, kategori tampil di hasil |
 | `80a0955` | Potongan BPJS karyawan, iuran perusahaan masuk bruto, rincian dasar perhitungan PPh 21; versi aset `?v=4` untuk mencegah cache lama |
 | `100084e` → `714b99f` | Catatan batasan perhitungan ditambahkan, lalu dibatalkan dengan `git revert` |
+| (commit ini) | Isian tersimpan di URL dan tombol Salin link; aset `?v=5` |
 
 ## Aturan hitung
 
