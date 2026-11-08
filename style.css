@@ -9,8 +9,12 @@
   --danger: #b42318;
 }
 
+/* Tema: ikut OS, kecuali dipilih manual lewat data-theme di <html>. */
+:root { color-scheme: light; }
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --bg: #0f1419;
     --surface: #1a2129;
     --text: #e8edf2;
@@ -20,6 +24,18 @@
     --accent-soft: #11302d;
     --danger: #f97066;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f1419;
+  --surface: #1a2129;
+  --text: #e8edf2;
+  --muted: #97a3b0;
+  --border: #2e3843;
+  --accent: #2dd4bf;
+  --accent-soft: #11302d;
+  --danger: #f97066;
 }
 
 * { box-sizing: border-box; }
@@ -45,21 +61,36 @@ header {
   gap: 12px;
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.theme-btn,
 .share-btn {
   flex-shrink: 0;
   margin-top: 2px;
   padding: 6px 12px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--surface);
+  color: var(--text);
   font: inherit;
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
 }
 
-.share-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.header-actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.share-btn {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
 
 h1 {
   font-size: 1.5rem;
