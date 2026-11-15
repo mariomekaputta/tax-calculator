@@ -275,3 +275,13 @@ dd {
   color: var(--muted);
   font-size: 0.8125rem;
 }
+
+.kurs-info {
+  margin: -10px 0 4px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.kurs-info.error { color: var(--danger); }
+
+.row[hidden], .kurs-info[hidden] { display: none; }

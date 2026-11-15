@@ -12,4 +12,5 @@
 # Rahasia & dependensi (jaga-jaga)
 .env
 .env.*
+!.env.example
 node_modules/

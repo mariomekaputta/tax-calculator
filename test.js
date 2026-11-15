@@ -1,7 +1,8 @@
 // Jalankan: node --test
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { hitung, tarif, TER, KATEGORI } = require("./app.js");
+const { hitung, tarif, TER, KATEGORI, keRupiah } = require("./app.js");
+const { bacaKurs, ambilKursUsd, PESAN_GAGAL } = require("./api/kurs.js");
 
 test("kasus uji di PROGRESS.md", () => {
   const cases = [
@@ -54,4 +55,60 @@ test("gaji nol", () => {
   const h = hitung(0, "K/3");
   assert.equal(h.pph, 0);
   assert.equal(h.bersih, 0);
+});
+
+test("bacaKurs mengambil conversion_rates.IDR", () => {
+  const k = bacaKurs({
+    result: "success",
+    time_last_update_utc: "Sun, 15 Nov 2026 00:00:01 +0000",
+    time_next_update_unix: 1795219201,
+    conversion_rates: { USD: 1, IDR: 16543.2134 },
+  });
+  assert.deepEqual(k, { rate: 16543.2134, waktu: "Sun, 15 Nov 2026 00:00:01 +0000" });
+});
+
+test("bacaKurs menolak respons gagal atau tanpa IDR", () => {
+  assert.throws(() => bacaKurs({ result: "error", "error-type": "invalid-key" }), /invalid-key/);
+  assert.throws(() => bacaKurs({ result: "success", conversion_rates: { USD: 1 } }), /IDR/);
+  assert.throws(() => bacaKurs({ result: "success", conversion_rates: { IDR: 0 } }), /IDR/);
+  assert.throws(() => bacaKurs(null));
+});
+
+test("gaji USD dikonversi ke rupiah lalu dihitung seperti biasa", () => {
+  const gaji = keRupiah(625, 16000);
+  assert.equal(gaji, 10000000);
+  assert.equal(hitung(gaji, "TK/0").bersih, 9338650);
+  assert.equal(keRupiah(1, 16543.2134), 16543);
+  assert.equal(keRupiah(3, 16543.5), 49631);
+});
+
+test("/api/kurs: key belum di-set atau tidak valid -> 503 'Kurs USD sedang tidak tersedia'", async () => {
+  const diam = console.error;
+  console.error = () => {};
+  try {
+    const jangan = () => assert.fail("tidak boleh memanggil API tanpa key");
+    assert.deepEqual(await ambilKursUsd(undefined, jangan), { status: 503, body: { error: PESAN_GAGAL } });
+    assert.deepEqual(await ambilKursUsd("", jangan), { status: 503, body: { error: PESAN_GAGAL } });
+
+    const kunciSalah = async () => ({ json: async () => ({ result: "error", "error-type": "invalid-key" }) });
+    assert.deepEqual(await ambilKursUsd("salah", kunciSalah), { status: 503, body: { error: PESAN_GAGAL } });
+
+    const putus = async () => { throw new Error("ECONNRESET"); };
+    assert.deepEqual(await ambilKursUsd("abc", putus), { status: 503, body: { error: PESAN_GAGAL } });
+  } finally {
+    console.error = diam;
+  }
+  assert.equal(PESAN_GAGAL, "Kurs USD sedang tidak tersedia");
+});
+
+test("/api/kurs: sukses mengembalikan rate tanpa membocorkan key", async () => {
+  let dipanggil;
+  const ok = async (url) => {
+    dipanggil = url;
+    return { json: async () => ({ result: "success", time_last_update_utc: "X", conversion_rates: { IDR: 18229.3636 } }) };
+  };
+  const hasil = await ambilKursUsd("rahasia123", ok);
+  assert.equal(dipanggil, "https://v6.exchangerate-api.com/v6/rahasia123/latest/USD");
+  assert.deepEqual(hasil, { status: 200, body: { rate: 18229.3636, waktu: "X" } });
+  assert.ok(!JSON.stringify(hasil.body).includes("rahasia123"));
 });

@@ -7,19 +7,23 @@ Kalkulator gaji bersih (take home pay) di browser: PPh 21 bulanan dengan tarif T
 - GitHub: https://github.com/mariomekaputta/tax-calculator
 - Vercel: https://tax-calculator-me-cfea.vercel.app — tercatat sebagai homepage repo. Saat dicek 1 November 2026 link ini membuka halaman login Vercel (Deployment Protection aktif), jadi isi deploy belum bisa dipastikan sama dengan `main`.
 - Tes: `node --test` (Node 18+, tanpa npm)
-- Lokal: `python3 -m http.server 3000` di folder ini, lalu buka http://localhost:3000
+- Lokal: salin `.env.example` jadi `.env` dan isi `EXCHANGE_RATE_API_KEY`, lalu `node server.js` (Node 20.12+/21.7+) dan buka http://localhost:3000
+- Vercel: isi `EXCHANGE_RATE_API_KEY` di Settings → Environment Variables; `api/kurs.js` jadi Vercel Function
 
 ## Struktur proyek
 
 | File | Isi |
 |---|---|
-| `index.html` | Halaman utama: pilihan status PTKP, isian gaji, kartu hasil, rincian dasar PPh 21 |
+| `index.html` | Halaman utama: pilihan status PTKP, mata uang gaji (IDR/USD), isian gaji, kartu hasil, rincian dasar PPh 21 |
 | `style.css` | Tampilan mobile-first; tema ikut OS atau dipilih manual (Otomatis/Terang/Gelap, tersimpan di localStorage) |
-| `app.js` | Tabel TER A/B/C, pemetaan status → kategori, konstanta BPJS, fungsi `hitung()`, logika UI. Mengekspor `hitung`, `tarif`, `TER`, `KATEGORI` untuk dites di Node |
-| `test.js` | Tes otomatis (`node --test`): kasus uji, pemetaan status, urutan tabel TER, batas tiap rentang A/B/C, batas dasar iuran BPJS |
+| `app.js` | Tabel TER A/B/C, pemetaan status → kategori, konstanta BPJS, fungsi `hitung()`, konversi USD → IDR (`keRupiah()`), logika UI. Kurs diambil dari `/api/kurs`, bukan langsung dari API kurs. Mengekspor `hitung`, `tarif`, `TER`, `KATEGORI`, `keRupiah` untuk dites di Node |
+| `api/kurs.js` | Fungsi server `GET /api/kurs`: ambil kurs USD → IDR dari ExchangeRate-API (`conversion_rates.IDR`) dengan key dari env, kirim balik `{ rate, waktu }` saja. Gagal → 503 "Kurs USD sedang tidak tersedia". Tanpa cache |
+| `server.js` | Server lokal tanpa npm: file statis + `/api/kurs`, membaca `.env`. Dotfile dan folder `api/` tidak disajikan |
+| `.env.example` | Contoh `.env` (tanpa key); `.env` asli tidak di-commit |
+| `test.js` | Tes otomatis (`node --test`): kasus uji, pemetaan status, urutan tabel TER, batas tiap rentang A/B/C, batas dasar iuran BPJS, konversi USD, `/api/kurs` (key kosong/tidak valid/jaringan putus, key tidak bocor) |
 | `tarif-ter.md` | Tabel TER kategori A, B, C dan pemetaan status PTKP, ditranskripsi dari sumber resmi beserta link-nya |
 | `PROGRESS.md` | Dokumen ini |
-| `.gitignore` | `.DS_Store`, folder editor, `.claude/settings.local.json`, `.env*`, `node_modules/` |
+| `.gitignore` | `.DS_Store`, folder editor, `.claude/settings.local.json`, `.env*` (kecuali `.env.example`), `node_modules/` |
 
 ## Fitur yang sudah selesai
 
@@ -32,7 +36,8 @@ Kalkulator gaji bersih (take home pay) di browser: PPh 21 bulanan dengan tarif T
 | `100084e` → `714b99f` | Catatan batasan perhitungan ditambahkan, lalu dibatalkan dengan `git revert` |
 | `aacc915` | Tes otomatis `test.js`; pencarian tarif dipisah ke fungsi `tarif()` |
 | `5bd3ec0` | Pilihan tema Otomatis/Terang/Gelap, tersimpan di localStorage |
-| (commit ini) | Isian tersimpan di URL dan tombol Salin link; aset `?v=7` |
+| `7251f1b` | Isian tersimpan di URL dan tombol Salin link; aset `?v=7` |
+| (commit ini) | Pilihan mata uang IDR/USD: USD dikonversi dengan kurs terbaru lewat fungsi server `/api/kurs`, kurs ditampilkan; server lokal `server.js`; aset `?v=10` |
 
 ## Aturan hitung
 
@@ -68,6 +73,7 @@ gaji bersih = gaji − JHT − JP − BPJS Kesehatan karyawan − PPh 21
 - Batas rentang TER: bruto tepat di batas "sampai dengan" ikut tarif rentang itu.
 - Tarif disimpan dalam basis poin (1% = 100) agar bebas galat floating point.
 - Tiap iuran BPJS dibulatkan ke rupiah terdekat; PPh 21 dibulatkan ke bawah.
+- Gaji USD: `gaji rupiah = round(USD × kurs)`, lalu dihitung seperti biasa. Hanya dolar bulat (tanpa sen).
 - Hanya untuk masa Januari–November. Desember (hitung ulang setahun dengan Pasal 17) belum didukung.
 
 **Kasus uji yang sudah dicek**
@@ -81,7 +87,10 @@ gaji bersih = gaji − JHT − JP − BPJS Kesehatan karyawan − PPh 21
 
 - Batas upah JP berubah tiap tahun; nilai Rp11.086.300 berasal dari spesifikasi, belum dicek ke sumber resmi BPJS Ketenagakerjaan.
 - Aturan pembulatan iuran BPJS belum dikonfirmasi.
-- Server lokal `http.server` tidak mengirim header cache; ganti angka `?v=` di `index.html` setiap kali CSS/JS berubah.
+- `server.js` mengirim `Cache-Control: no-store`, tapi tetap ganti angka `?v=` di `index.html` setiap kali CSS/JS berubah (untuk Vercel/CDN).
+- Kurs tidak di-cache (keputusan sengaja): setiap kunjungan yang memilih USD memakai 1 request kuota ExchangeRate-API.
+- `/api/kurs` publik tanpa rate limit; siapa pun bisa memanggilnya berulang dan menghabiskan kuota.
+- `server.js` dan `/api/kurs` belum dites di Vercel.
 - Email author commit memakai alamat pribadi dan repo bersifat publik.
 
 ## Ide fitur berikutnya
@@ -90,5 +99,5 @@ gaji bersih = gaji − JHT − JP − BPJS Kesehatan karyawan − PPh 21
 2. **Tunjangan dan komponen lain**: tunjangan tetap/tidak tetap, THR, bonus, lembur.
 3. **Mode kebalikan**: dari gaji bersih yang diinginkan, cari gaji kotor (gross-up).
 4. **Pengaturan BPJS**: opsi tidak ikut JP/BPJS Kesehatan, tarif JKK sesuai tingkat risiko, batas upah yang bisa diubah.
-5. **Bagikan dan cetak**: simpan input ke URL agar bisa dibagikan, tombol salin/cetak rincian.
+5. **Cetak**: tombol cetak rincian (bagikan lewat URL sudah selesai).
 6. **Deploy**: pastikan Vercel publik dan otomatis deploy dari `main`, atau pakai GitHub Pages.

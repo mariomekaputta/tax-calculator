@@ -93,6 +93,14 @@ function hitung(gaji, status = "TK/0") {
   return { kategori, bp, bruto, potongan, tunjangan, pph, bersih: gaji - totalBpjs - pph };
 }
 
+// Kurs USD -> IDR diambil lewat fungsi server /api/kurs (api/kurs.js); API key hanya ada di server.
+const KURS_GAGAL = "Kurs USD sedang tidak tersedia";
+
+// Jumlah USD -> rupiah, dibulatkan ke rupiah terdekat.
+function keRupiah(usd, rate) {
+  return Math.round(usd * rate);
+}
+
 const rupiah = (n) => "Rp" + n.toLocaleString("id-ID");
 const persen = (bp) => (bp / 100).toLocaleString("id-ID") + "%";
 
@@ -101,13 +109,82 @@ if (typeof document !== "undefined") {
   const err = document.getElementById("error");
   const status = document.getElementById("status");
   const el = (id) => document.getElementById(id);
+  const mataUang = el("mata-uang");
+  const kursInfo = el("kurs-info");
   const brutoSaatIni = () => Number(input.value.replace(/\D/g, "")) || 0;
+  const pakaiUsd = () => mataUang.value === "USD";
+
+  // Kurs diambil ulang setiap halaman dibuka dan setiap USD dipilih (tanpa cache).
+  let kurs = null;
+  let kursError = "";
+  let kursDiambil = null;
+
+  // Apa pun penyebab gagalnya (key belum di-set, key tidak valid, jaringan), pesannya sama.
+  async function ambilKurs() {
+    try {
+      const res = await fetch("/api/kurs", { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok && typeof data.rate === "number" && data.rate > 0) return data;
+    } catch (e) {}
+    throw new Error(KURS_GAGAL);
+  }
+
+  function siapkanKurs() {
+    if (kursDiambil) return;
+    kurs = null;
+    kursError = "";
+    kursDiambil = ambilKurs()
+      .then((k) => (kurs = k))
+      .catch((e) => (kursError = e.message))
+      .finally(() => {
+        kursDiambil = null;
+        perbarui();
+      });
+    perbarui();
+  }
+
+  // Gaji dalam rupiah: langsung bila IDR, dikonversi dengan kurs bila USD.
+  function gajiRupiah() {
+    if (!pakaiUsd()) return brutoSaatIni();
+    return kurs ? keRupiah(brutoSaatIni(), kurs.rate) : 0;
+  }
+
+  function perbarui() {
+    const usd = pakaiUsd();
+    el("prefix").textContent = usd ? "US$" : "Rp";
+    el("row-kurs").hidden = !usd;
+    kursInfo.hidden = !usd;
+    kursInfo.classList.toggle("error", Boolean(usd && kursError));
+
+    const teksKurs = kurs ? "1 USD = " + rupiah(Math.round(kurs.rate * 100) / 100) : "—";
+    el("kurs").textContent = teksKurs;
+    if (usd) {
+      if (kursError) kursInfo.textContent = kursError;
+      else if (!kurs) kursInfo.textContent = "Mengambil kurs terbaru…";
+      else {
+        const waktu = new Date(kurs.waktu);
+        const tgl = isNaN(waktu) ? "" : " · diperbarui " + waktu.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+        kursInfo.textContent = "Kurs " + teksKurs + tgl + " (ExchangeRate-API)";
+      }
+    }
+
+    const gaji = gajiRupiah();
+    if (!Number.isSafeInteger(gaji)) {
+      err.textContent = "Angkanya terlalu besar.";
+      return;
+    }
+    err.textContent = "";
+    tampilkan(gaji);
+  }
 
   function tampilkan(bruto) {
     const h = hitung(bruto, status.value);
     el("kategori").textContent = "TER kategori " + h.kategori;
     el("status-hasil").textContent = status.value;
     el("kotor").textContent = rupiah(bruto);
+    el("kotor-label").textContent = pakaiUsd() && brutoSaatIni()
+      ? "Gaji kotor (US$" + brutoSaatIni().toLocaleString("id-ID") + ")"
+      : "Gaji kotor";
     el("jht").textContent = "−" + rupiah(h.potongan.jht);
     el("jp").textContent = "−" + rupiah(h.potongan.jp);
     el("kes").textContent = "−" + rupiah(h.potongan.kesehatan);
@@ -139,24 +216,32 @@ if (typeof document !== "undefined") {
     }
     input.setSelectionRange(pos, pos);
 
-    tampilkan(bruto);
+    perbarui();
   });
 
-  // Isian disimpan di URL (?status=K/1&gaji=7000000) agar hasil bisa dibagikan.
+  // Isian disimpan di URL (?status=K/1&mata_uang=USD&gaji=3000) agar hasil bisa dibagikan.
+  // Nilai gaji di URL dalam mata uang yang dipilih.
   const params = new URLSearchParams(location.search);
   if (params.get("status") in KATEGORI) status.value = params.get("status");
+  if (params.get("mata_uang") === "USD") mataUang.value = "USD";
   const gajiUrl = Number(params.get("gaji"));
   if (Number.isSafeInteger(gajiUrl) && gajiUrl > 0) input.value = gajiUrl.toLocaleString("id-ID");
 
   function simpanKeUrl() {
     const q = new URLSearchParams({ status: status.value });
+    if (pakaiUsd()) q.set("mata_uang", "USD");
     if (brutoSaatIni()) q.set("gaji", brutoSaatIni());
     history.replaceState(null, "", "?" + q);
   }
 
   input.addEventListener("input", simpanKeUrl);
   status.addEventListener("change", () => {
-    tampilkan(brutoSaatIni());
+    perbarui();
+    simpanKeUrl();
+  });
+  mataUang.addEventListener("change", () => {
+    if (pakaiUsd()) siapkanKurs();
+    perbarui();
     simpanKeUrl();
   });
 
@@ -172,7 +257,8 @@ if (typeof document !== "undefined") {
     setTimeout(() => (tombolBagikan.textContent = "Salin link"), 2000);
   });
 
-  tampilkan(brutoSaatIni());
+  if (pakaiUsd()) siapkanKurs();
+  perbarui();
 
   // Tombol tema: Otomatis (ikut OS) -> Terang -> Gelap -> Otomatis.
   const TEMA = [["auto", "Otomatis"], ["light", "Terang"], ["dark", "Gelap"]];
@@ -197,4 +283,4 @@ if (typeof document !== "undefined") {
   labelTema();
 }
 
-if (typeof module !== "undefined") module.exports = { hitung, tarif, TER, KATEGORI };
+if (typeof module !== "undefined") module.exports = { hitung, tarif, TER, KATEGORI, keRupiah };
