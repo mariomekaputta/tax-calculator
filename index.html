@@ -12,7 +12,7 @@
       if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
     } catch (e) {}
   </script>
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
   <main class="wrap">
@@ -47,14 +47,25 @@
       </span>
     </label>
 
+    <label class="field" for="mata-uang">
+      <span class="field-label">Mata uang gaji</span>
+      <span class="input-box select-box">
+        <select id="mata-uang">
+          <option value="IDR" selected>IDR · Rupiah</option>
+          <option value="USD">USD · Dolar AS (dikonversi ke Rupiah)</option>
+        </select>
+      </span>
+    </label>
+
     <label class="field" for="gaji">
       <span class="field-label">Gaji kotor per bulan</span>
       <span class="input-box">
-        <span class="prefix">Rp</span>
+        <span class="prefix" id="prefix">Rp</span>
         <input id="gaji" type="text" inputmode="numeric" autocomplete="off"
-               placeholder="0" aria-describedby="error">
+               placeholder="0" aria-describedby="kurs-info error">
       </span>
     </label>
+    <p id="kurs-info" class="kurs-info" aria-live="polite" hidden></p>
     <p id="error" class="error" role="alert"></p>
 
     <section class="card" aria-live="polite">
@@ -67,8 +78,12 @@
         </span>
       </div>
       <dl class="rows">
+        <div class="row" id="row-kurs" hidden>
+          <dt>Kurs</dt>
+          <dd id="kurs">—</dd>
+        </div>
         <div class="row">
-          <dt>Gaji kotor</dt>
+          <dt id="kotor-label">Gaji kotor</dt>
           <dd id="kotor">Rp0</dd>
         </div>
         <div class="row">
@@ -116,6 +131,6 @@
     <p class="note">Berlaku untuk masa Januari–November. Dasar iuran JP maksimal Rp11.086.300, BPJS Kesehatan maksimal Rp12.000.000.</p>
   </main>
 
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
